@@ -18,6 +18,9 @@ namespace lexer {
         static constexpr int LTEQ = 260;
         static constexpr int GTEQ = 261;
         static constexpr int NEQ = 262;
+
+        static constexpr int START_BLOCK = 123;
+        static constexpr int END_BLOCK = 125;
     };
 
     struct Num : public Token {
