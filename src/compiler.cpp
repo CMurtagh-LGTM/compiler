@@ -1,3 +1,3 @@
 #include "lexer/lexer.hpp"
 
-int main(){}
+int main() {}
