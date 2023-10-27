@@ -5,11 +5,11 @@
 int char_to_digit(const char c) { return c - '0'; }
 
 bool char_is_digit(const char c) {
-    return (c - '0' <= '0' - '9') && (c - '0' >= 0);
+    return c >= '0' && c <= '9';
 }
 
 bool char_is_letter(const char c) {
-    return (c - 'A' <= 'A' - 'z') && (c - 'A' >= 0);
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
 namespace lexer {
@@ -24,6 +24,7 @@ Lexer::Lexer(std::istream &stream_) : stream(stream_) {
 
 std::shared_ptr<Token> Lexer::scan() {
     // White-space and comments
+    peek = stream.get();
     for (;; peek = stream.get()) {
         if (peek == ' ' || peek == '\t') {
             continue;
