@@ -7,35 +7,36 @@
 namespace ast {
 
 struct ID {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Constant {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Operation {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Relation {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Access {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Assign {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
-struct Expression : std::variant<ID, Constant, Operation, Relation, Access, Assign> {
+struct Expression
+    : std::variant<ID, Constant, Operation, Relation, Access, Assign> {
     using variant::variant;
 
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
-}
+} // namespace ast
 
 #endif // expression_HPP

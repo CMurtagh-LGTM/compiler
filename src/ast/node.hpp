@@ -6,18 +6,18 @@
 #include <memory>
 #include <string>
 #include <typeindex>
-#include <vector>
 #include <variant>
+#include <vector>
 
 namespace ast {
 
 struct Root {
-    void print(std::ostream& out) const;
+    void print(std::ostream &out) const;
 };
 
 struct Statement {
-    void print(std::ostream& out) const;
-    //virtual void gen(std::string &) = 0;
+    void print(std::ostream &out) const;
+    // virtual void gen(std::string &) = 0;
 };
 
 struct Node : std::variant<Root, Expression, Statement> {
@@ -25,10 +25,9 @@ struct Node : std::variant<Root, Expression, Statement> {
 
     std::vector<Node> children;
 
-    void print(std::ostream& out, int tabs = 0) const;
+    void print(std::ostream &out, int tabs = 0) const;
 
-    template<typename T, typename... Args>
-    Node& add_child(Args... args){
+    template <typename T, typename... Args> Node &add_child(Args... args) {
         children.push_back(T(args...));
         return children.back();
     }

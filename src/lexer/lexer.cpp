@@ -4,25 +4,16 @@
 
 int char_to_digit(const char c) { return c - '0'; }
 
-bool char_is_digit(const char c) {
-    return c >= '0' && c <= '9';
-}
+bool char_is_digit(const char c) { return c >= '0' && c <= '9'; }
 
 bool char_is_letter(const char c) {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
 namespace lexer {
-void Lexer::reserve(const Word &t) {
-    words.insert(std::make_pair(t.lexeme, std::make_shared<Word>(t)));
-}
+Lexer::Lexer(std::istream& s): stream(s){}
 
-Lexer::Lexer(std::istream &stream_) : stream(stream_) {
-    reserve(Word(Token::TRUE, "true"));
-    reserve(Word(Token::FALSE, "false"));
-}
-
-std::shared_ptr<Token> Lexer::scan() {
+Token Lexer::scan() {
     // White-space and comments
     peek = stream.get();
     for (;; peek = stream.get()) {
@@ -57,6 +48,11 @@ std::shared_ptr<Token> Lexer::scan() {
         }
     }
 
+    // EOF
+    if (peek == std::istream::traits_type::eof()) {
+        return Token(Token::eof());
+    }
+
     // Integers
     if (char_is_digit(peek)) {
         int v = 0;
@@ -75,10 +71,12 @@ std::shared_ptr<Token> Lexer::scan() {
                 peek = stream.get();
                 place++;
             }
-            return std::make_shared<Float>(fv);
+            return Token(fv);
         }
 
-        return std::make_shared<Num>(v);
+        stream.unget();
+
+        return Token(v);
     }
 
     // Float
@@ -91,7 +89,7 @@ std::shared_ptr<Token> Lexer::scan() {
             peek = stream.get();
             place++;
         }
-        return std::make_shared<Float>(fv);
+        return Token(fv);
     }
 
     // ids
@@ -101,51 +99,46 @@ std::shared_ptr<Token> Lexer::scan() {
             s += peek;
             peek = stream.get();
         } while (char_is_digit(peek) || char_is_letter(peek));
-        if (words.contains(s)) {
-            return words.at(s);
-        }
-        auto w = std::make_shared<Word>(Token::ID, s);
-        words.insert(std::make_pair(s, w));
-        return w;
+        return Token(s);
     }
 
     // relations
     switch (peek) {
     case '<':
         if (stream.get() == '=') {
-            return std::make_shared<Token>(Token::LTEQ);
+            return Token(Token::LTEQ);
         }
         stream.unget();
-        return std::make_shared<Token>(Token::LT);
+        return Token(Token::LT);
     case '=':
         if (stream.get() == '=') {
-            return std::make_shared<Token>(Token::EQ);
+            return Token(Token::EQ);
         }
         stream.unget();
         break;
     case '!':
         if (stream.get() == '=') {
-            return std::make_shared<Token>(Token::NEQ);
+            return Token(Token::NEQ);
         }
         stream.unget();
         break;
     case '>':
         if (stream.get() == '=') {
-            return std::make_shared<Token>(Token::GTEQ);
+            return Token(Token::GTEQ);
         }
         stream.unget();
-        return std::make_shared<Token>(Token::GT);
+        return Token(Token::GT);
     }
 
-    auto t = std::make_shared<Token>(peek);
+    auto t = Token(peek);
     peek = ' ';
     return t;
 }
 
-std::vector<std::shared_ptr<Token>> Lexer::scan_all(){
-    std::vector<std::shared_ptr<Token>> tokens;
+std::vector<Token> Lexer::scan_all() {
+    std::vector<Token> tokens;
     auto token = scan();
-    while(token->tag != std::istream::traits_type::eof()){
+    while (!token.is_eof()) {
         tokens.push_back(token);
         token = scan();
     }
