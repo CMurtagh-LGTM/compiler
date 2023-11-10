@@ -141,4 +141,14 @@ std::shared_ptr<Token> Lexer::scan() {
     peek = ' ';
     return t;
 }
+
+std::vector<std::shared_ptr<Token>> Lexer::scan_all(){
+    std::vector<std::shared_ptr<Token>> tokens;
+    auto token = scan();
+    while(token->tag != std::istream::traits_type::eof()){
+        tokens.push_back(token);
+        token = scan();
+    }
+    return tokens;
+}
 } // namespace lexer

@@ -27,6 +27,8 @@ struct Token {
         out << tag;
         return out;
     }
+
+    bool operator==(const std::string&);
 };
 
 inline std::ostream& operator<< (std::ostream& out, const Token& t){

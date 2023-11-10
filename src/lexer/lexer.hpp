@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "token.hpp"
 
@@ -20,6 +21,7 @@ class Lexer {
   public:
     Lexer(std::istream &stream_);
     std::shared_ptr<Token> scan();
+    std::vector<std::shared_ptr<Token>> scan_all();
 };
 } // namespace lexer
 

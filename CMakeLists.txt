@@ -17,3 +17,15 @@ add_custom_target(
         -i
         ${sources}
 )
+
+
+## STACK TRACE LIBRARY
+
+include(FetchContent)
+FetchContent_Declare(
+  cpptrace
+  GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+  GIT_TAG        v0.2.1 # <HASH or TAG>
+)
+FetchContent_MakeAvailable(cpptrace)
+target_link_libraries(compiler cpptrace)

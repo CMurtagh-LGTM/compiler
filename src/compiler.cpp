@@ -1,6 +1,8 @@
 #include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
 #include <sstream>
 #include <iostream>
+#include <variant>
 
 int main(int argc, char *argv[]) {
     std::istringstream in;
@@ -10,9 +12,21 @@ int main(int argc, char *argv[]) {
     }
     in = std::istringstream(argv[1]);
     auto lexer = lexer::Lexer(in);
-    auto token = lexer.scan();
-    while(token->tag != std::istringstream::traits_type::eof()){
-        std::cout << *token << std::endl;
-        token = lexer.scan();
+    auto tokens = lexer.scan_all();
+
+    for(auto token : tokens){
+        std::cout << *token << ", ";
+    }
+    std::cout << std::endl;
+
+    auto parser = parser::Parser(tokens.begin(), tokens.end());
+
+    try {
+        auto ast_root = parser.parse();
+        ast_root->print(std::cout);
+    }
+    catch (parser::syntax_error& e){
+        std::cout << std::endl;
+        std::cout << e.what() << std::endl;
     }
 }
