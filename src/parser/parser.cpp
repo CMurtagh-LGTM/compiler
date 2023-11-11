@@ -4,83 +4,122 @@
 #include <iostream>
 namespace parser {
 
+using ast::Node;
+
 Parser::Parser(iter begin_, iter end_)
     : begin(begin_), curr(begin_), end(end_) {}
 
-std::unique_ptr<ast::Node> Parser::parse() {
-    auto tree = std::make_unique<ast::Node>(ast::Root());
-    if (expr(*tree) && curr == end) {
+std::unique_ptr<Node> Parser::parse() {
+    auto tree = std::make_unique<Node>(ast::Root());
+    tree->add_child(expr());
+    if (curr == end) {
         return tree;
     }
-    fail("Empty File or Expr");
+    fail("Tokens left over");
     return tree;
 }
 
-bool Parser::fail(const std::string &why) {
+ast::Node Parser::fail(const std::string &why) {
     throw syntax_error(why, *curr, std::distance(begin, curr));
 }
 
-bool Parser::expr(ast::Node &n) {
-    auto e = n.add_child<ast::Operation>();
-    if (term(e)) {
-        return expr_prime(e);
+ast::Node Parser::expr() {
+    auto t = term();
+    auto n = expr_prime();
+    if(n.has_value()){
+        n->add_child(t);
+        return *n;
     }
-    return fail("Expected Term");
+    return t;
 }
 
-bool Parser::expr_prime(ast::Node &n) {
-    if (curr == end) {
-        return true;
+std::optional<ast::Node> Parser::expr_prime() {
+    if (curr == end || (*curr) == ")") {
+        return std::optional<Node>();
     }
-    if ((*curr) == "+" || (*curr) == "-") {
-        curr++;
-        if (term(n)) {
-            return expr_prime(n);
-        } else {
-            return fail("Expected Term");
-        }
-    } else if ((*curr) == ")") {
-        return true;
+
+    ast::Operation::Type operation_type;
+    if ((*curr == "+")) {
+        operation_type = ast::Operation::ADD;
+    } else if((*curr == "/")) {
+        operation_type = ast::Operation::SUBTRACT;
+    } else {
+        return fail("Expected * or /");
     }
-    return fail("Expected + or - or )");
+
+    curr++;
+    auto n = Node(ast::Operation(operation_type));
+    auto t = term();
+    auto e = expr_prime();
+
+    if(e.has_value()){
+        e->add_child(t);
+        n.add_child(*e);
+    }else{
+        n.add_child(t);
+    }
+    return n;
 }
 
-bool Parser::term(ast::Node &n) {
-    auto e = n.add_child<ast::Operation>();
-    if (factor(e)) {
-        return term_prime(e);
+ast::Node Parser::term() {
+    auto f = factor();
+    auto n = term_prime();
+    if(n.has_value()){
+        n->add_child(f);
+        return *n;
+    } else {
+        return f;
     }
-    return fail("Expected Factor");
 }
 
-bool Parser::term_prime(ast::Node &n) {
-    if (curr == end) {
-        return true;
+std::optional<ast::Node> Parser::term_prime() {
+    if (curr == end || (*curr) == "+" || (*curr) == "-" || (*curr) == ")") {
+        return std::optional<Node>();
     }
-    if ((*curr) == "x" || (*curr) == "/") {
-        curr++;
-        if (factor(n)) {
-            return term_prime(n);
-        }
-        return fail("z");
-    } else if ((*curr) == "+" || (*curr) == "-" || (*curr) == ")") {
-        return true;
+
+    ast::Operation::Type operation_type;
+    if ((*curr == "*")) {
+        operation_type = ast::Operation::MULTIPLY;
+    } else if((*curr == "/")) {
+        operation_type = ast::Operation::DIVIDE;
+    } else {
+        return fail("Expected * or /");
     }
-    return fail("Expected x or / or + or - or )");
+
+    curr++;
+    auto n = Node(ast::Operation(operation_type));
+    auto f = factor();
+    auto t = term_prime();
+
+    if(t.has_value()){
+        t->add_child(f);
+        n.add_child(Node(*t));
+    } else {
+        n.add_child(f);
+    }
+
+    return n;
 }
 
-bool Parser::factor(ast::Node &n) {
+ast::Node Parser::factor() {
     if ((*curr) == "(") {
         curr++;
-        if (!expr(n) || (*curr) != ")") {
-            return fail("z");
+        auto n = expr();
+        if ((*curr) != ")") {
+            return fail("Expected closing bracket");
         }
         curr++;
-        return true;
+        return n;
     } else if ((*curr).is_constant()) {
-        n.add_child<ast::Constant>();
+        auto n = std::visit([](auto&& arg)->Node {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr(std::is_same_v<T, int>){
+                return Node(ast::Constant(arg)); // TODO
+            }
+            return Node(ast::Constant());
+        }, curr->value);
         curr++;
-        return true;
+        return n;
     }
     return fail("z");
 }

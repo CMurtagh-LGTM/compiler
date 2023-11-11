@@ -4,9 +4,17 @@ namespace ast {
 
 void ID::print(std::ostream &out) const { out << "ID"; }
 
-void Constant::print(std::ostream &out) const { out << "Constant"; }
+void Constant::print(std::ostream &out) const { out << "Constant " << value; }
 
-void Operation::print(std::ostream &out) const { out << "Operation"; }
+void Operation::print(std::ostream &out) const {
+    out << "Operation ";
+    switch(value){
+        case ADD: out << "+"; break;
+        case SUBTRACT: out << "-"; break;
+        case MULTIPLY: out << "*"; break;
+        case DIVIDE: out << "/"; break;
+    }
+}
 
 void Relation::print(std::ostream &out) const { out << "Relation"; }
 

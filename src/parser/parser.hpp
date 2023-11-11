@@ -17,12 +17,12 @@ class Parser {
     iter curr;
     iter end;
 
-    bool fail(const std::string &why);
-    bool expr(ast::Node &);
-    bool expr_prime(ast::Node &);
-    bool term(ast::Node &);
-    bool term_prime(ast::Node &);
-    bool factor(ast::Node &);
+    ast::Node fail(const std::string &why);
+    ast::Node expr();
+    std::optional<ast::Node> expr_prime();
+    ast::Node term();
+    std::optional<ast::Node> term_prime();
+    ast::Node factor();
 
   public:
     Parser(iter begin, iter end);

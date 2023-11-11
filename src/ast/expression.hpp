@@ -11,10 +11,17 @@ struct ID {
 };
 
 struct Constant {
+    int value; // TODO
     void print(std::ostream &out) const;
 };
 
 struct Operation {
+    enum Type {
+        ADD,
+        SUBTRACT,
+        MULTIPLY,
+        DIVIDE,
+    } value;
     void print(std::ostream &out) const;
 };
 

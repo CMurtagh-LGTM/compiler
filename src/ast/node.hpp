@@ -27,7 +27,12 @@ struct Node : std::variant<Root, Expression, Statement> {
 
     void print(std::ostream &out, int tabs = 0) const;
 
-    template <typename T, typename... Args> Node &add_child(Args... args) {
+    void add_child(Node n){
+        children.push_back(n);
+    }
+
+    template <typename T, typename... Args>
+    Node &add_child(Args... args) {
         children.push_back(T(args...));
         return children.back();
     }

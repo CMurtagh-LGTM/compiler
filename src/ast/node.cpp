@@ -3,7 +3,7 @@
 namespace ast {
 
 void Node::print(std::ostream &out, const int tabs) const {
-    out << std::string("  ", tabs);
+    out << std::string(tabs*2, ' ');
     std::visit([&out](auto &&args) { args.print(out); }, *this);
     out << std::endl;
 
