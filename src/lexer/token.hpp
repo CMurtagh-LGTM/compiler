@@ -8,43 +8,42 @@
 
 namespace lexer {
 
-struct Token {
-    struct eof {
-        friend std::ostream &operator<<(std::ostream &out, const eof);
+    struct Token {
+        struct eof {
+            friend std::ostream& operator<<(std::ostream& out, const eof);
+        };
+
+        enum RelationOperator {
+            LT,
+            GT,
+            EQ,
+            LTEQ,
+            GTEQ,
+            NEQ,
+        };
+
+        Token(const int);
+        Token(const float);
+        Token(const bool);
+        Token(const char);
+        Token(const std::string&);
+        Token(const RelationOperator);
+        Token(const eof);
+
+        bool operator==(const std::string&) const;
+
+        void print(std::ostream& out) const;
+
+        bool is_constant() const;
+        bool is_eof() const;
+
+        std::string to_string() const;
+
+        std::variant<int, float, bool, char, std::string, RelationOperator, eof> value;
     };
 
-    enum RelationOperator {
-        LT,
-        GT,
-        EQ,
-        LTEQ,
-        GTEQ,
-        NEQ,
-    };
+    std::ostream& operator<<(std::ostream& out, const Token::RelationOperator);
 
-    Token(const int);
-    Token(const float);
-    Token(const bool);
-    Token(const char);
-    Token(const std::string &);
-    Token(const RelationOperator);
-    Token(const eof);
+}  // namespace lexer
 
-    bool operator==(const std::string &) const;
-
-    void print(std::ostream &out) const;
-
-    bool is_constant() const;
-    bool is_eof() const;
-
-    std::string to_string() const;
-
-    std::variant<int, float, bool, char, std::string, RelationOperator, eof>
-        value;
-};
-
-std::ostream &operator<<(std::ostream &out, const Token::RelationOperator);
-
-} // namespace lexer
-
-#endif // token_HPP
+#endif  // token_HPP

@@ -1,43 +1,43 @@
 #ifndef node_HPP
 #define node_HPP
 
-#include "expression.hpp"
-
 #include <memory>
 #include <string>
 #include <typeindex>
 #include <variant>
 #include <vector>
 
+#include "expression.hpp"
+
 namespace ast {
 
-struct Root {
-    void print(std::ostream &out) const;
-};
+    struct Root {
+        void print(std::ostream& out) const;
+    };
 
-struct Statement {
-    void print(std::ostream &out) const;
-    // virtual void gen(std::string &) = 0;
-};
+    struct Statement {
+        void print(std::ostream& out) const;
+        // virtual void gen(std::string &) = 0;
+    };
 
-struct Node : std::variant<Root, Expression, Statement> {
-    using variant::variant;
+    struct Node : std::variant<Root, Expression, Statement> {
+        using variant::variant;
 
-    std::vector<Node> children;
+        std::vector<Node> children;
 
-    void print(std::ostream &out, int tabs = 0) const;
+        void print(std::ostream& out, int tabs = 0) const;
 
-    void add_child(Node n){
-        children.push_back(n);
-    }
+        void add_child(Node n) {
+            children.push_back(n);
+        }
 
-    template <typename T, typename... Args>
-    Node &add_child(Args... args) {
-        children.push_back(T(args...));
-        return children.back();
-    }
-};
+        template <typename T, typename... Args>
+        Node& add_child(Args... args) {
+            children.push_back(T(args...));
+            return children.back();
+        }
+    };
 
-} // namespace ast
+}  // namespace ast
 
-#endif // node_HPP
+#endif  // node_HPP

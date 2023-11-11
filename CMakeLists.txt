@@ -12,7 +12,7 @@ add_executable(compiler ${sources})
 target_include_directories(compiler PRIVATE src/)
 
 add_custom_target(
-        clangformat
+        format
         COMMAND /usr/bin/clang-format
         -i
         ${sources}

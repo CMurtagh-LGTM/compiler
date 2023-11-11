@@ -2,29 +2,39 @@
 
 namespace ast {
 
-void ID::print(std::ostream &out) const { out << "ID"; }
-
-void Constant::print(std::ostream &out) const { out << "Constant " << value; }
-
-void Operation::print(std::ostream &out) const {
-    out << "Operation ";
-    switch(value){
-        case ADD: out << "+"; break;
-        case SUBTRACT: out << "-"; break;
-        case MULTIPLY: out << "*"; break;
-        case DIVIDE: out << "/"; break;
+    void ID::print(std::ostream& out) const {
+        out << "ID";
     }
-}
 
-void Relation::print(std::ostream &out) const { out << "Relation"; }
+    void Constant::print(std::ostream& out) const {
+        out << "Constant " << value;
+    }
 
-void Access::print(std::ostream &out) const { out << "Access"; }
+    void Operation::print(std::ostream& out) const {
+        out << "Operation ";
+        switch (value) {
+            case ADD: out << "+"; break;
+            case SUBTRACT: out << "-"; break;
+            case MULTIPLY: out << "*"; break;
+            case DIVIDE: out << "/"; break;
+        }
+    }
 
-void Assign::print(std::ostream &out) const { out << "Assign"; }
+    void Relation::print(std::ostream& out) const {
+        out << "Relation";
+    }
 
-void Expression::print(std::ostream &out) const {
-    out << "Expression: ";
-    std::visit([&out](auto &&args) { args.print(out); }, *this);
-}
+    void Access::print(std::ostream& out) const {
+        out << "Access";
+    }
 
-} // namespace ast
+    void Assign::print(std::ostream& out) const {
+        out << "Assign";
+    }
+
+    void Expression::print(std::ostream& out) const {
+        out << "Expression: ";
+        std::visit([&out](auto&& args) { args.print(out); }, *this);
+    }
+
+}  // namespace ast

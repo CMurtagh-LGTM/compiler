@@ -10,16 +10,16 @@
 #include "token.hpp"
 
 namespace lexer {
-class Lexer {
-    int line = 0;
-    char peek = ' ';
-    std::istream &stream;
+    class Lexer {
+        int line  = 0;
+        char peek = ' ';
+        std::istream& stream;
 
-  public:
-    Lexer(std::istream &stream_);
-    Token scan();
-    std::vector<Token> scan_all();
-};
-} // namespace lexer
+    public:
+        Lexer(std::istream& stream_);
+        Token scan();
+        std::vector<Token> scan_all();
+    };
+}  // namespace lexer
 
-#endif // lexer_Hpp
+#endif  // lexer_Hpp

@@ -6,18 +6,18 @@
 
 namespace symbol {
 
-struct Symbol {};
+    struct Symbol {};
 
-class Environment {
-    std::unordered_map<std::string, Symbol> table;
-    Environment *prev;
+    class Environment {
+        std::unordered_map<std::string, Symbol> table;
+        Environment* prev;
 
-  public:
-    Environment(Environment *prev_);
-    void put(const std::string &s, Symbol sym);
-    Symbol *get(const std::string &s);
-};
+    public:
+        Environment(Environment* prev_);
+        void put(const std::string& s, Symbol sym);
+        Symbol* get(const std::string& s);
+    };
 
-} // namespace symbol
+}  // namespace symbol
 
-#endif // env_HPP
+#endif  // env_HPP
