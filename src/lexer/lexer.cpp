@@ -49,7 +49,8 @@ namespace lexer {
                 }
                 else {
                     stream.unget();
-                    continue;
+                    peek = '/';
+                    break;
                 }
             }
             else {
