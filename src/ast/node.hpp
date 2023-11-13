@@ -11,33 +11,21 @@
 
 namespace ast {
 
-    struct Root {
-        void print(std::ostream& out) const;
-    };
-
     struct Statement {
-        void print(std::ostream& out) const;
-        // virtual void gen(std::string &) = 0;
+        void print(std::ostream& out, const int tabs = 0) const;
+
+        std::unique_ptr<Expression> expression; // TODO
+        Statement(std::unique_ptr<Expression>&& expression);
     };
 
-    struct Node : std::variant<Root, Expression, Statement> {
-        using variant::variant;
-
-        std::vector<Node> children;
-
-        void print(std::ostream& out, int tabs = 0) const;
-
-        void add_child(Node n) {
-            children.push_back(n);
+    struct Root {
+        std::vector<Statement> children;
+        void add_child(Statement&& n) {
+            children.emplace_back(std::move(n));
         }
 
-        template <typename T, typename... Args>
-        Node& add_child(Args... args) {
-            children.push_back(T(args...));
-            return children.back();
-        }
+        void print(std::ostream& out, const int tabs = 0) const;
     };
-
 }  // namespace ast
 
 #endif  // node_HPP

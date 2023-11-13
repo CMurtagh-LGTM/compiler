@@ -17,16 +17,17 @@ namespace parser {
         iter curr;
         iter end;
 
-        ast::Node fail(const std::string& why);
-        ast::Node expr();
-        std::optional<ast::Node> expr_prime();
-        ast::Node term();
-        std::optional<ast::Node> term_prime();
-        ast::Node factor();
+        auto fail(const std::string& why);
+        ast::Statement statement();
+        std::unique_ptr<ast::Expression> expr();
+        std::unique_ptr<ast::Expression> expr_prime();
+        std::unique_ptr<ast::Expression> term();
+        std::unique_ptr<ast::Expression> term_prime();
+        std::unique_ptr<ast::Expression> factor();
 
     public:
         Parser(iter begin, iter end);
-        std::unique_ptr<ast::Node> parse();
+        std::unique_ptr<ast::Root> parse();
     };
 }  // namespace parser
 

@@ -5,13 +5,19 @@
 #include "ast/expression.hpp"
 namespace parser {
 
-    using ast::Node;
+    using ast::Root;
+    using ast::Statement;
+    using ast::Expression;
 
     Parser::Parser(iter begin_, iter end_) : begin(begin_), curr(begin_), end(end_) {}
 
-    std::unique_ptr<Node> Parser::parse() {
-        auto tree = std::make_unique<Node>(ast::Root());
-        tree->add_child(expr());
+    auto Parser::fail(const std::string& why) {
+        throw syntax_error(why, *curr, std::distance(begin, curr));
+    }
+
+    std::unique_ptr<Root> Parser::parse() {
+        auto tree = std::make_unique<Root>();
+        tree->add_child(Statement(expr()));
         if (curr == end) {
             return tree;
         }
@@ -19,66 +25,63 @@ namespace parser {
         return tree;
     }
 
-    ast::Node Parser::fail(const std::string& why) {
-        throw syntax_error(why, *curr, std::distance(begin, curr));
-    }
-
-    ast::Node Parser::expr() {
+    std::unique_ptr<Expression> Parser::expr() {
         auto t = term();
         auto n = expr_prime();
-        if (n.has_value()) {
-            n->add_child(t);
-            return *n;
+        if (n) {
+            std::get<ast::Operation>(*n).lhs = std::move(t);
+            return n;
         }
         return t;
     }
 
-    std::optional<ast::Node> Parser::expr_prime() {
+    std::unique_ptr<ast::Expression> Parser::expr_prime() {
         if (curr == end || (*curr) == ")") {
-            return std::optional<Node>();
+            return std::unique_ptr<ast::Expression>();
         }
 
         ast::Operation::Type operation_type;
         if ((*curr == "+")) {
             operation_type = ast::Operation::ADD;
         }
-        else if ((*curr == "/")) {
+        else if ((*curr == "-")) {
             operation_type = ast::Operation::SUBTRACT;
         }
         else {
-            return fail("Expected * or /");
+            fail("Expected * or /");
+            return std::unique_ptr<ast::Expression>();
         }
 
         curr++;
-        auto n = Node(ast::Operation(operation_type));
+        auto n = std::make_unique<Expression>(ast::Operation(operation_type));
         auto t = term();
         auto e = expr_prime();
 
-        if (e.has_value()) {
-            e->add_child(t);
-            n.add_child(*e);
+        if (e) {
+            std::get<ast::Operation>(*e).lhs = std::move(t);
+            std::get<ast::Operation>(*n).rhs = std::move(e);
         }
         else {
-            n.add_child(t);
+            std::get<ast::Operation>(*n).rhs = std::move(t);
         }
         return n;
     }
 
-    ast::Node Parser::term() {
+    std::unique_ptr<ast::Expression> Parser::term() {
         auto f = factor();
         auto n = term_prime();
-        if (n.has_value()) {
-            n->add_child(f);
-            return *n;
+        if (n) {
+            std::get<ast::Operation>(*n).lhs = std::move(f);
+            return n;
         }
         else {
             return f;
         }
     }
 
-    std::optional<ast::Node> Parser::term_prime() {
+    std::unique_ptr<ast::Expression> Parser::term_prime() {
         if (curr == end || (*curr) == "+" || (*curr) == "-" || (*curr) == ")") {
-            return std::optional<Node>();
+            return std::unique_ptr<ast::Expression>();
         }
 
         ast::Operation::Type operation_type;
@@ -89,49 +92,52 @@ namespace parser {
             operation_type = ast::Operation::DIVIDE;
         }
         else {
-            return fail("Expected * or /");
+            fail("Expected * or /");
+            return std::unique_ptr<ast::Expression>();
         }
 
         curr++;
-        auto n = Node(ast::Operation(operation_type));
+        auto n = std::make_unique<ast::Expression>(ast::Operation(operation_type));
         auto f = factor();
         auto t = term_prime();
 
-        if (t.has_value()) {
-            t->add_child(f);
-            n.add_child(Node(*t));
+        if (t) {
+            std::get<ast::Operation>(*t).lhs = std::move(f);
+            std::get<ast::Operation>(*n).rhs = std::move(t);
         }
         else {
-            n.add_child(f);
+            std::get<ast::Operation>(*n).rhs = std::move(f);
         }
 
         return n;
     }
 
-    ast::Node Parser::factor() {
+    std::unique_ptr<Expression> Parser::factor() {
         if ((*curr) == "(") {
             curr++;
             auto n = expr();
             if ((*curr) != ")") {
-                return fail("Expected closing bracket");
+                fail("Expected closing bracket");
+                return std::unique_ptr<Expression>();
             }
             curr++;
             return n;
         }
         else if ((*curr).is_constant()) {
-            auto n = std::visit(
-                [](auto&& arg) -> Node {
+            auto n = std::make_unique<ast::Expression>(std::visit(
+                [](auto&& arg) -> ast::Constant {
                     using T = std::decay_t<decltype(arg)>;
                     if constexpr (std::is_same_v<T, int>) {
-                        return Node(ast::Constant(arg));  // TODO
+                        return ast::Constant(arg);  // TODO
                     }
-                    return Node(ast::Constant());
+                    return ast::Constant();
                 },
-                curr->value);
+                curr->value));
             curr++;
             return n;
         }
-        return fail("z");
+        fail("Expected a constant");
+        return std::unique_ptr<Expression>();
     }
 
 }  // namespace parser
