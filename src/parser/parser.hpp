@@ -18,7 +18,11 @@ namespace parser {
         iter end;
 
         auto fail(const std::string& why);
-        ast::Statement statement();
+
+        ast::Statement stmnt();
+        ast::Statement branch();
+        ast::Statement assign();
+
         std::unique_ptr<ast::Expression> expr();
         std::unique_ptr<ast::Expression> expr_prime();
         std::unique_ptr<ast::Expression> term();

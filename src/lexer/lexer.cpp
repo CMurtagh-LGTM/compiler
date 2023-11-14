@@ -109,6 +109,7 @@ namespace lexer {
                 s += peek;
                 peek = stream.get();
             } while (char_is_digit(peek) || char_is_letter(peek));
+            stream.unget();
             return Token(s);
         }
 

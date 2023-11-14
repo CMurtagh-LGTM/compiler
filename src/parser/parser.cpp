@@ -17,12 +17,84 @@ namespace parser {
 
     std::unique_ptr<Root> Parser::parse() {
         auto tree = std::make_unique<Root>();
-        tree->add_child(Statement(expr()));
-        if (curr == end) {
-            return tree;
+        while(curr != end){
+            tree->add_child(stmnt());
         }
-        fail("Tokens left over");
         return tree;
+    }
+
+    Statement Parser::stmnt() {
+        if(*curr == "if"){
+            return branch();
+        }
+        if(*curr == "for"){
+            fail("unimplemented");
+        }
+        
+        if(*curr == "let"){
+            return assign();
+        }
+
+        fail("Expected a statement");
+        return Statement();
+    }
+
+    Statement Parser::branch(){
+        curr++;
+
+        auto statement = Statement(ast::IF());
+        auto& branch = std::get<ast::IF>(statement);
+
+        if(*curr != "("){
+            fail("Expected ( to start if condition");
+        }
+        curr++;
+
+        branch.condition = expr();
+
+        if(*curr != ")"){
+            fail("Expected ) to end if condition");
+        }
+        curr++;
+
+        if(*curr != "{"){
+            fail("Expected {");
+        }
+        curr++;
+ 
+        while(*curr != "}"){
+            branch.statements.push_back(Parser::stmnt());
+        }
+        curr++;
+
+        return statement;
+    }
+
+    Statement Parser::assign(){
+        curr++;
+
+        auto statement = Statement(ast::Assign());
+        auto& assign = std::get<ast::Assign>(statement);
+
+        if(!curr->is_id()){
+            fail("Expected ID to assign to");
+        }
+        assign.id = curr->get<std::string>();
+        curr++;
+
+        if(*curr != "="){
+            fail("Expected = for assignment");
+        }
+        curr++;
+
+        assign.expression = expr();
+
+        if(*curr != ";"){
+            fail("Expected ; to finish assignment");
+        }
+        curr++;
+
+        return statement;
     }
 
     std::unique_ptr<Expression> Parser::expr() {
@@ -36,15 +108,15 @@ namespace parser {
     }
 
     std::unique_ptr<ast::Expression> Parser::expr_prime() {
-        if (curr == end || (*curr) == ")") {
+        if (curr == end || *curr == ";" || (*curr) == ")") {
             return std::unique_ptr<ast::Expression>();
         }
 
         ast::Operation::Type operation_type;
-        if ((*curr == "+")) {
+        if (*curr == "+") {
             operation_type = ast::Operation::ADD;
         }
-        else if ((*curr == "-")) {
+        else if (*curr == "-") {
             operation_type = ast::Operation::SUBTRACT;
         }
         else {
@@ -80,7 +152,7 @@ namespace parser {
     }
 
     std::unique_ptr<ast::Expression> Parser::term_prime() {
-        if (curr == end || (*curr) == "+" || (*curr) == "-" || (*curr) == ")") {
+        if (curr == end || *curr == ";" || (*curr) == "+" || (*curr) == "-" || (*curr) == ")") {
             return std::unique_ptr<ast::Expression>();
         }
 
@@ -132,7 +204,7 @@ namespace parser {
                     }
                     return ast::Constant();
                 },
-                curr->value));
+                curr->get()));
             curr++;
             return n;
         }

@@ -35,10 +35,6 @@ namespace ast {
         out << "Access";
     }
 
-    void Assign::print(std::ostream& out, const int tabs) const {
-        out << "Assign";
-    }
-
     void Expression::print(std::ostream& out, const int tabs) const {
         std::visit([&out, tabs](auto&& args) { args.print(out, tabs); }, *this);
     }

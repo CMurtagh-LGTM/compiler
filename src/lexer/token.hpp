@@ -36,9 +36,20 @@ namespace lexer {
 
         bool is_constant() const;
         bool is_eof() const;
+        bool is_id() const;
 
         std::string to_string() const;
 
+        template <typename T>
+        T get() const {
+            return std::get<T>(value);
+        }
+
+        auto& get() const {
+            return value;
+        }
+
+    private:
         std::variant<int, float, bool, char, std::string, RelationOperator, eof> value;
     };
 

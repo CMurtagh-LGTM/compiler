@@ -56,6 +56,11 @@ namespace lexer {
         return std::holds_alternative<int>(value) || std::holds_alternative<float>(value);
     }
 
+
+    bool Token::is_id() const{
+        return std::holds_alternative<std::string>(value);
+    }
+
     Token::Token(const int v) : value(v) {}
     Token::Token(const float v) : value(v) {}
     Token::Token(const bool v) : value(v) {}

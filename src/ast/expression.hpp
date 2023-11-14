@@ -42,10 +42,6 @@ namespace ast {
         void print(std::ostream& out, const int tabs = 0) const;
     };
 
-    struct Assign {
-        void print(std::ostream& out, const int tabs = 0) const;
-    };
-
     struct Expression : std::variant<ID, Constant, Operation, Relation> {
         using variant::variant;
 
